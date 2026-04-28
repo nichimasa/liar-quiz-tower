@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>嘘つきクイズタワー</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="game-shell">
+      <section class="tower-panel" aria-label="クイズタワーの進行状況">
+        <div class="tower-sky">
+          <div class="moon"></div>
+          <div class="star star-one"></div>
+          <div class="star star-two"></div>
+          <div class="star star-three"></div>
+          <div class="tower" id="tower"></div>
+        </div>
+        <div class="status-grid">
+          <div>
+            <span class="status-label">階層</span>
+            <strong id="floorText">1 / 8</strong>
+          </div>
+          <div>
+            <span class="status-label">正解</span>
+            <strong id="scoreText">0</strong>
+          </div>
+          <div>
+            <span class="status-label">ヒント</span>
+            <strong id="hintText">0</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="quiz-panel" aria-live="polite">
+        <div class="title-row">
+          <p class="kicker">Question the question.</p>
+          <h1>嘘つきクイズタワー</h1>
+        </div>
+
+        <div class="question-box">
+          <p class="rule-tag" id="ruleTag">問題文を信じてもいいとは限らない</p>
+          <h2 id="questionText"></h2>
+        </div>
+
+        <div class="choices" id="choices"></div>
+
+        <div class="action-row">
+          <button class="ghost-button" id="hintButton" type="button">ヒント</button>
+          <button class="primary-button hidden" id="nextButton" type="button">次の問題へ</button>
+          <button class="ghost-button" id="restartButton" type="button">最初から</button>
+        </div>
+
+        <p class="feedback" id="feedback"></p>
+      </section>
+    </main>
+
+    <dialog class="result-dialog" id="resultDialog">
+      <div class="result-content">
+        <p class="kicker">Tower cleared</p>
+        <h2 id="resultTitle">登頂成功</h2>
+        <p id="resultMessage"></p>
+        <div class="result-actions">
+          <button id="playAgainButton" type="button">もう一度挑戦</button>
+          <button class="ghost-button" id="closeResultButton" type="button">終了する</button>
+        </div>
+      </div>
+    </dialog>
+
+    <script src="script.js"></script>
+  </body>
+</html>

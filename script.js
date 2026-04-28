@@ -1,237 +1,332 @@
-const questions = [
-  {
-    tag: "最初の一問だけは親切かもしれない",
-    question: "次のうち、一番大きい数字はどれ？",
-    choices: ["7", "12", "9"],
-    answer: 1,
-    hint: "ここはまだ普通のクイズです。",
-    success: "正解。塔はまだ本性を隠しています。",
-    failure: "ここは素直に数字の大きさを見る場面でした。",
-  },
-  {
-    tag: "問題文が急に調子に乗り始めた",
-    question: "絶対に左を選ばないでください。",
-    choices: ["左", "中央", "右"],
-    answer: 0,
-    hint: "この塔は、お願いのふりをした誘導が得意です。",
-    success: "正解。禁止されているものほど怪しいですね。",
-    failure: "今の文章は命令ではなく、罠でした。",
-  },
-  {
-    tag: "見た目の情報も答えになる",
-    question: "赤い選択肢を選べ。ただし、この文は嘘です。",
-    choices: [
-      { label: "赤ではない" },
-      { label: "赤い", tone: "red" },
-      { label: "青っぽい", tone: "blue" },
-    ],
-    answer: 0,
-    hint: "嘘の文が命令しているなら、命令の逆を見ます。",
-    success: "正解。色よりも、文の嘘を優先しました。",
-    failure: "「赤い選択肢を選べ」が嘘なので、赤を避けます。",
-  },
-  {
-    tag: "数える対象を疑う",
-    question: "この問題文にある「の」の数はいくつ？",
-    choices: ["1", "2", "3"],
-    answer: 1,
-    hint: "「この問題文にある」の部分も問題文です。",
-    success: "正解。「この問題文にある」と「の」の2つです。",
-    failure: "表示されている文全体から「の」を数えます。",
-  },
-  {
-    tag: "正解という言葉も信用しすぎない",
-    question: "正解は「不正解」と書かれたボタンです。",
-    choices: ["正解", "不正解", "どちらでもない"],
-    answer: 1,
-    hint: "ここは文が本当です。言葉の意味ではなく、ラベルを見ます。",
-    success: "正解。「不正解」と書かれたボタンが正解でした。",
-    failure: "ラベルとしての「不正解」を選ぶ問題でした。",
-  },
-  {
-    tag: "一番短い道がいつも近道とは限らない",
-    question: "一番短い選択肢を選んでください。",
-    choices: ["長い選択肢", "短", "いちばんみじかい"],
-    answer: 1,
-    hint: "文字数を比べます。ひねりがないと見せかけたひねりです。",
-    success: "正解。今回はシンプルな観察でした。",
-    failure: "選択肢の文字数だけを比べる場面でした。",
-  },
-  {
-    tag: "塔はメタな顔をしてくる",
-    question: "ここまでの正解数が5なら、右を選べ。",
-    choices: ["左", "中央", "右"],
-    answer: 2,
-    hint: "ここまで全問正解なら、今の時点で正解数は5です。",
-    success: "正解。現在地を把握できています。",
-    failure: "ここまでの正解数を使う、タワーらしい問題でした。",
-  },
-  {
-    tag: "最後は問題そのものを疑う",
-    question: "最後の問題です。正解はありません。",
-    choices: ["ありません", "ある", "最後ではない"],
-    answer: 1,
-    hint: "正解が本当にないなら、ゲームは進めません。",
-    success: "正解。正解はちゃんとありました。",
-    failure: "「正解はありません」という宣言が嘘でした。",
-  },
-];
+const puzzleBank = {
+  10: [
+    { numbers: [1, 2, 3, 4], solution: "(4 + 3) + (2 + 1)" },
+    { numbers: [2, 3, 5, 7], solution: "(7 - 5) * (2 + 3)" },
+    { numbers: [1, 4, 6, 8], solution: "(8 + 6) - (4 * 1)" },
+    { numbers: [2, 5, 8, 9], solution: "(9 + 8) - (5 + 2)" },
+    { numbers: [3, 4, 6, 9], solution: "(9 + 4) - (6 - 3)" },
+    { numbers: [1, 2, 7, 8], solution: "8 / 2 + 7 - 1" },
+  ],
+  20: [
+    { numbers: [2, 4, 5, 9], solution: "(9 + 5 - 4) * 2" },
+    { numbers: [1, 6, 7, 8], solution: "8 + 7 + 6 - 1" },
+    { numbers: [2, 4, 8, 9], solution: "9 * 2 + 8 / 4" },
+    { numbers: [1, 5, 6, 9], solution: "(9 - 5) * (6 - 1)" },
+    { numbers: [2, 3, 7, 8], solution: "8 * 2 + 7 - 3" },
+    { numbers: [2, 4, 6, 8], solution: "(8 + 6 - 4) * 2" },
+  ],
+  30: [
+    { numbers: [2, 5, 6, 9], solution: "(9 - 6) * (5 * 2)" },
+    { numbers: [4, 5, 7, 8], solution: "8 * 4 - 7 + 5" },
+    { numbers: [2, 5, 7, 9], solution: "9 * 2 + 7 + 5" },
+    { numbers: [2, 4, 8, 9], solution: "9 * 4 - 8 + 2" },
+    { numbers: [1, 4, 6, 9], solution: "(9 - 4) * (6 * 1)" },
+    { numbers: [1, 4, 7, 9], solution: "(9 + 1) * (7 - 4)" },
+  ],
+};
 
-const tower = document.querySelector("#tower");
-const floorText = document.querySelector("#floorText");
-const scoreText = document.querySelector("#scoreText");
-const hintText = document.querySelector("#hintText");
-const ruleTag = document.querySelector("#ruleTag");
-const questionText = document.querySelector("#questionText");
-const choices = document.querySelector("#choices");
+const difficultyButtons = document.querySelectorAll(".difficulty-button");
+const streakText = document.querySelector("#streakText");
+const targetBadge = document.querySelector("#targetBadge");
+const targetText = document.querySelector("#targetText");
+const expressionDisplay = document.querySelector("#expressionDisplay");
+const currentValueText = document.querySelector("#currentValueText");
+const usedCountText = document.querySelector("#usedCountText");
+const numberGrid = document.querySelector("#numberGrid");
+const operatorButtons = document.querySelectorAll(".operator-button");
+const parenButtons = document.querySelectorAll(".paren-button");
+const undoButton = document.querySelector("#undoButton");
+const clearButton = document.querySelector("#clearButton");
+const checkButton = document.querySelector("#checkButton");
+const newPuzzleButton = document.querySelector("#newPuzzleButton");
 const feedback = document.querySelector("#feedback");
-const hintButton = document.querySelector("#hintButton");
-const nextButton = document.querySelector("#nextButton");
-const restartButton = document.querySelector("#restartButton");
-const resultDialog = document.querySelector("#resultDialog");
-const resultTitle = document.querySelector("#resultTitle");
-const resultMessage = document.querySelector("#resultMessage");
-const playAgainButton = document.querySelector("#playAgainButton");
-const closeResultButton = document.querySelector("#closeResultButton");
 
-let current = 0;
-let score = 0;
-let hints = 0;
-let answered = false;
+let target = 10;
+let puzzleIndex = 0;
+let puzzle = null;
+let tokens = [];
+let usedNumberIds = new Set();
+let selectedOperator = null;
+let streak = 0;
+let solved = false;
 
-function buildTower() {
-  tower.innerHTML = "";
-  questions.forEach((_, index) => {
-    const floor = document.createElement("div");
-    floor.className = "tower-floor";
-    floor.setAttribute("aria-label", `${index + 1}階`);
-    tower.append(floor);
-  });
+function makePuzzle(rawPuzzle) {
+  return {
+    numbers: shuffle(rawPuzzle.numbers).map((value, index) => ({
+      id: `${Date.now()}-${index}-${value}`,
+      value,
+    })),
+    solution: rawPuzzle.solution,
+  };
 }
 
-function updateTower() {
-  [...tower.children].forEach((floor, index) => {
-    floor.classList.toggle("cleared", index < current);
-    floor.classList.toggle("current", index === current);
-  });
+function shuffle(items) {
+  return [...items].sort(() => Math.random() - 0.5);
 }
 
-function updateStatus() {
-  floorText.textContent = `${Math.min(current + 1, questions.length)} / ${questions.length}`;
-  scoreText.textContent = score;
-  hintText.textContent = hints;
-}
-
-function renderQuestion() {
-  answered = false;
-  const item = questions[current];
-  ruleTag.textContent = item.tag;
-  questionText.textContent = item.question;
+function loadPuzzle(nextTarget = target) {
+  target = Number(nextTarget);
+  const bank = puzzleBank[target];
+  puzzle = makePuzzle(bank[puzzleIndex % bank.length]);
+  puzzleIndex += 1;
+  tokens = [];
+  usedNumberIds = new Set();
+  selectedOperator = null;
+  solved = false;
+  targetBadge.textContent = target;
+  targetText.textContent = `${target}を作れ`;
   feedback.textContent = "";
   feedback.className = "feedback";
-  choices.innerHTML = "";
+  updateDifficultyTabs();
+  renderNumbers();
+  renderExpression();
+  updateControlStates();
+}
 
-  item.choices.forEach((choice, index) => {
-    const choiceLabel = typeof choice === "string" ? choice : choice.label;
-    const tone = typeof choice === "string" ? "" : choice.tone;
+function updateDifficultyTabs() {
+  difficultyButtons.forEach((button) => {
+    button.classList.toggle("active", Number(button.dataset.target) === target);
+  });
+}
+
+function renderNumbers() {
+  numberGrid.innerHTML = "";
+  puzzle.numbers.forEach((number) => {
     const button = document.createElement("button");
-    button.className = "choice-button";
-    if (tone) {
-      button.classList.add(tone);
-    }
+    button.className = "number-button";
     button.type = "button";
-    button.textContent = choiceLabel;
-    button.addEventListener("click", () => selectAnswer(index, button));
-    choices.append(button);
+    button.textContent = number.value;
+    button.disabled = usedNumberIds.has(number.id) || solved;
+    button.classList.toggle("used", usedNumberIds.has(number.id));
+    button.addEventListener("click", () => chooseNumber(number));
+    numberGrid.append(button);
   });
-
-  hintButton.disabled = false;
-  nextButton.classList.add("hidden");
-  nextButton.textContent = "次の問題へ";
-  updateTower();
-  updateStatus();
 }
 
-function selectAnswer(index, selectedButton) {
-  if (answered) return;
-  answered = true;
+function chooseNumber(number) {
+  if (solved || usedNumberIds.has(number.id)) return;
+  const lastToken = tokens[tokens.length - 1];
+  if (lastToken?.type === "number" || lastToken?.type === "closeParen") return;
 
-  const item = questions[current];
-  const buttons = [...choices.querySelectorAll("button")];
-  buttons.forEach((button) => {
-    button.disabled = true;
-  });
-
-  if (index === item.answer) {
-    score += 1;
-    selectedButton.classList.add("correct");
-    feedback.textContent = item.success;
-    feedback.classList.add("good");
-  } else {
-    selectedButton.classList.add("incorrect");
-    buttons[item.answer].classList.add("correct");
-    feedback.textContent = item.failure;
-    feedback.classList.add("bad");
-  }
-
-  current += 1;
-  updateTower();
-  updateStatus();
-  nextButton.textContent = current >= questions.length ? "結果を見る" : "次の問題へ";
-  nextButton.classList.remove("hidden");
-}
-
-function showHint() {
-  if (answered) return;
-  hints += 1;
-  feedback.textContent = questions[current].hint;
+  tokens.push({ type: "number", value: number.value, id: number.id });
+  usedNumberIds.add(number.id);
+  selectedOperator = null;
+  feedback.textContent = "";
   feedback.className = "feedback";
-  hintButton.disabled = true;
-  updateStatus();
+  renderNumbers();
+  renderExpression();
+  updateControlStates();
 }
 
-function showResult() {
-  const perfect = score === questions.length;
-  resultTitle.textContent = perfect ? "完全登頂" : "登頂成功";
-  resultMessage.textContent = `結果は ${score} / ${questions.length} 正解、ヒント使用 ${hints} 回。${
-    perfect
-      ? "あなたは疑うべき場所をよく知っています。"
-      : "次は問題文の声色まで疑ってみましょう。"
-  }`;
-  resultDialog.showModal();
-}
+function chooseOperator(operator) {
+  if (solved || tokens.length === 0) return;
+  const lastToken = tokens[tokens.length - 1];
 
-function goNext() {
-  if (!answered) return;
-  if (current >= questions.length) {
-    showResult();
+  if (lastToken.type === "operator") {
+    lastToken.value = operator;
+  } else if (lastToken.type === "number" || lastToken.type === "closeParen") {
+    tokens.push({ type: "operator", value: operator });
+  } else {
     return;
   }
-  renderQuestion();
+
+  selectedOperator = operator;
+  feedback.textContent = "";
+  feedback.className = "feedback";
+  renderExpression();
+  updateControlStates();
 }
 
-function restartGame() {
-  current = 0;
-  score = 0;
-  hints = 0;
-  answered = false;
-  if (resultDialog.open) {
-    resultDialog.close();
+function chooseParen(paren) {
+  if (solved) return;
+  const lastToken = tokens[tokens.length - 1];
+  const openCount = countParens("open");
+  const closeCount = countParens("close");
+
+  if (paren === "open") {
+    if (lastToken?.type === "number" || lastToken?.type === "closeParen") return;
+    tokens.push({ type: "openParen", value: "(" });
+  } else {
+    if (!lastToken || lastToken.type === "operator" || lastToken.type === "openParen") return;
+    if (closeCount >= openCount) return;
+    tokens.push({ type: "closeParen", value: ")" });
   }
-  renderQuestion();
+
+  selectedOperator = null;
+  feedback.textContent = "";
+  feedback.className = "feedback";
+  renderExpression();
+  updateControlStates();
 }
 
-function closeResult() {
-  if (resultDialog.open) {
-    resultDialog.close();
+function renderExpression() {
+  if (tokens.length === 0) {
+    expressionDisplay.textContent = "数字を選択";
+  } else {
+    expressionDisplay.textContent = tokens.map(formatToken).join(" ");
+  }
+
+  const value = evaluateTokens(tokens);
+  currentValueText.textContent = Number.isFinite(value) ? `現在値: ${formatNumber(value)}` : "現在値: -";
+  usedCountText.textContent = `${usedNumberIds.size} / ${puzzle.numbers.length}`;
+}
+
+function updateControlStates() {
+  const lastToken = tokens[tokens.length - 1];
+  const canUseOperator = Boolean(lastToken) && (lastToken.type === "number" || lastToken.type === "closeParen") && !solved;
+  operatorButtons.forEach((button) => {
+    const operator = button.dataset.operator;
+    button.disabled = !canUseOperator;
+    button.classList.toggle("active", selectedOperator === operator);
+  });
+
+  const openCount = countParens("open");
+  const closeCount = countParens("close");
+  parenButtons.forEach((button) => {
+    const paren = button.dataset.paren;
+    const canOpen = !lastToken || lastToken.type === "operator" || lastToken.type === "openParen";
+    const canClose = Boolean(lastToken) && lastToken.type !== "operator" && lastToken.type !== "openParen" && closeCount < openCount;
+    button.disabled = solved || (paren === "open" ? !canOpen : !canClose);
+  });
+}
+
+function formatToken(token) {
+  if (token.type === "number") return token.value;
+  if (token.type === "openParen") return "(";
+  if (token.type === "closeParen") return ")";
+  return {
+    "+": "+",
+    "-": "−",
+    "*": "×",
+    "/": "÷",
+  }[token.value];
+}
+
+function evaluateTokens(inputTokens) {
+  if (!isCompleteExpression(inputTokens)) {
+    return NaN;
+  }
+
+  const expression = inputTokens.map((token) => token.value).join("");
+  try {
+    const value = Function(`"use strict"; return (${expression});`)();
+    return Number.isFinite(value) ? value : NaN;
+  } catch {
+    return NaN;
   }
 }
 
-hintButton.addEventListener("click", showHint);
-nextButton.addEventListener("click", goNext);
-restartButton.addEventListener("click", restartGame);
-playAgainButton.addEventListener("click", restartGame);
-closeResultButton.addEventListener("click", closeResult);
+function formatNumber(value) {
+  if (Number.isInteger(value)) return value;
+  return Math.round(value * 100) / 100;
+}
 
-buildTower();
-renderQuestion();
+function checkAnswer() {
+  if (tokens.length === 0) {
+    showBad("まず数字をタップして式を作ります。");
+    return;
+  }
+
+  if (usedNumberIds.size < puzzle.numbers.length) {
+    showBad("4つの数字をすべて使ってください。");
+    return;
+  }
+
+  if (!isCompleteExpression(tokens)) {
+    showBad("式の並びや括弧を確認してください。");
+    return;
+  }
+
+  const value = evaluateTokens(tokens);
+  if (!Number.isFinite(value)) {
+    showBad("計算できない式になっています。括弧や割り算を確認してください。");
+    return;
+  }
+
+  if (Math.abs(value - target) < 0.000001) {
+    solved = true;
+    streak += 1;
+    streakText.textContent = streak;
+    showGood(`成功。${expressionDisplay.textContent} = ${target}`);
+    renderNumbers();
+    updateControlStates();
+    return;
+  }
+
+  streak = 0;
+  streakText.textContent = streak;
+  showBad(`${formatNumber(value)} になっています。別の組み合わせを試しましょう。`);
+}
+
+function showGood(message) {
+  feedback.textContent = message;
+  feedback.className = "feedback good";
+}
+
+function showBad(message) {
+  feedback.textContent = message;
+  feedback.className = "feedback bad";
+}
+
+function undo() {
+  if (solved || tokens.length === 0) return;
+  const token = tokens.pop();
+  if (token.type === "number") {
+    usedNumberIds.delete(token.id);
+  }
+  selectedOperator = tokens[tokens.length - 1]?.type === "operator" ? tokens[tokens.length - 1].value : null;
+  feedback.textContent = "";
+  feedback.className = "feedback";
+  renderNumbers();
+  renderExpression();
+  updateControlStates();
+}
+
+function clearExpression() {
+  if (solved) return;
+  tokens = [];
+  usedNumberIds = new Set();
+  selectedOperator = null;
+  feedback.textContent = "";
+  feedback.className = "feedback";
+  renderNumbers();
+  renderExpression();
+  updateControlStates();
+}
+
+function countParens(kind) {
+  const tokenType = kind === "open" ? "openParen" : "closeParen";
+  return tokens.filter((token) => token.type === tokenType).length;
+}
+
+function isCompleteExpression(inputTokens) {
+  if (inputTokens.length === 0) return false;
+  const lastToken = inputTokens[inputTokens.length - 1];
+  if (lastToken.type !== "number" && lastToken.type !== "closeParen") return false;
+  return (
+    inputTokens.filter((token) => token.type === "openParen").length ===
+    inputTokens.filter((token) => token.type === "closeParen").length
+  );
+}
+
+difficultyButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    puzzleIndex = 0;
+    loadPuzzle(button.dataset.target);
+  });
+});
+
+operatorButtons.forEach((button) => {
+  button.addEventListener("click", () => chooseOperator(button.dataset.operator));
+});
+
+parenButtons.forEach((button) => {
+  button.addEventListener("click", () => chooseParen(button.dataset.paren));
+});
+
+undoButton.addEventListener("click", undo);
+clearButton.addEventListener("click", clearExpression);
+checkButton.addEventListener("click", checkAnswer);
+newPuzzleButton.addEventListener("click", () => loadPuzzle(target));
+
+loadPuzzle();

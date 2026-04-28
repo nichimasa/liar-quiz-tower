@@ -3,69 +3,72 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>嘘つきクイズタワー</title>
+    <title>ナンバークラフト</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <main class="game-shell">
-      <section class="tower-panel" aria-label="クイズタワーの進行状況">
-        <div class="tower-sky">
-          <div class="moon"></div>
-          <div class="star star-one"></div>
-          <div class="star star-two"></div>
-          <div class="star star-three"></div>
-          <div class="tower" id="tower"></div>
-        </div>
-        <div class="status-grid">
+    <main class="app-shell">
+      <section class="game-board" aria-label="数字パズル">
+        <header class="top-bar">
           <div>
-            <span class="status-label">階層</span>
-            <strong id="floorText">1 / 8</strong>
+            <p class="kicker">Number Craft</p>
+            <h1>ナンバークラフト</h1>
           </div>
-          <div>
-            <span class="status-label">正解</span>
-            <strong id="scoreText">0</strong>
+          <div class="score-card" aria-label="現在の成績">
+            <span>連続</span>
+            <strong id="streakText">0</strong>
           </div>
-          <div>
-            <span class="status-label">ヒント</span>
-            <strong id="hintText">0</strong>
-          </div>
-        </div>
-      </section>
+        </header>
 
-      <section class="quiz-panel" aria-live="polite">
-        <div class="title-row">
-          <p class="kicker">Question the question.</p>
-          <h1>嘘つきクイズタワー</h1>
+        <div class="difficulty-tabs" role="tablist" aria-label="難易度">
+          <button class="difficulty-button active" type="button" data-target="10">初級</button>
+          <button class="difficulty-button" type="button" data-target="20">中級</button>
+          <button class="difficulty-button" type="button" data-target="30">上級</button>
         </div>
 
-        <div class="question-box">
-          <p class="rule-tag" id="ruleTag">問題文を信じてもいいとは限らない</p>
-          <h2 id="questionText"></h2>
-        </div>
+        <section class="target-panel" aria-live="polite">
+          <div class="target-ring" aria-hidden="true">
+            <span id="targetBadge">10</span>
+          </div>
+          <div>
+            <p class="panel-label">目標</p>
+            <h2 id="targetText">10を作れ</h2>
+          </div>
+        </section>
 
-        <div class="choices" id="choices"></div>
+        <section class="expression-panel" aria-label="作成中の式">
+          <p class="panel-label">式</p>
+          <div class="expression-display" id="expressionDisplay">数字を選択</div>
+          <div class="result-line">
+            <span id="currentValueText">現在値: -</span>
+            <span id="usedCountText">0 / 4</span>
+          </div>
+        </section>
+
+        <section class="number-grid" id="numberGrid" aria-label="使える数字"></section>
+
+        <section class="operator-grid" aria-label="演算子">
+          <button class="operator-button" type="button" data-operator="+">+</button>
+          <button class="operator-button" type="button" data-operator="-">−</button>
+          <button class="operator-button" type="button" data-operator="*">×</button>
+          <button class="operator-button" type="button" data-operator="/">÷</button>
+        </section>
+
+        <section class="paren-grid" aria-label="括弧">
+          <button class="paren-button" type="button" data-paren="open">(</button>
+          <button class="paren-button" type="button" data-paren="close">)</button>
+        </section>
 
         <div class="action-row">
-          <button class="ghost-button" id="hintButton" type="button">ヒント</button>
-          <button class="primary-button hidden" id="nextButton" type="button">次の問題へ</button>
-          <button class="ghost-button" id="restartButton" type="button">最初から</button>
+          <button class="icon-button" id="undoButton" type="button" aria-label="1つ戻す">↶</button>
+          <button class="icon-button" id="clearButton" type="button" aria-label="式を消す">C</button>
+          <button class="primary-button" id="checkButton" type="button">判定</button>
+          <button class="ghost-button" id="newPuzzleButton" type="button">新しい問題</button>
         </div>
 
-        <p class="feedback" id="feedback"></p>
+        <p class="feedback" id="feedback" aria-live="polite"></p>
       </section>
     </main>
-
-    <dialog class="result-dialog" id="resultDialog">
-      <div class="result-content">
-        <p class="kicker">Tower cleared</p>
-        <h2 id="resultTitle">登頂成功</h2>
-        <p id="resultMessage"></p>
-        <div class="result-actions">
-          <button id="playAgainButton" type="button">もう一度挑戦</button>
-          <button class="ghost-button" id="closeResultButton" type="button">終了する</button>
-        </div>
-      </div>
-    </dialog>
 
     <script src="script.js"></script>
   </body>

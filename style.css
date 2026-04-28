@@ -51,6 +51,7 @@ button {
   align-items: center;
 }
 
+.home-screen,
 .game-board {
   width: 100%;
   padding: 18px;
@@ -58,6 +59,81 @@ button {
   border-radius: 8px;
   background: rgba(255, 250, 240, 0.94);
   box-shadow: var(--shadow);
+}
+
+.hidden {
+  display: none;
+}
+
+.home-hero {
+  margin-bottom: 16px;
+}
+
+.home-copy {
+  margin-bottom: 0;
+  color: var(--muted);
+  font-weight: 750;
+  line-height: 1.6;
+}
+
+.level-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.level-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-strong);
+}
+
+.level-card h2 {
+  margin: 4px 0 0;
+  font-size: 1.9rem;
+  line-height: 1;
+}
+
+.level-card strong {
+  color: var(--mint);
+  font-size: 1.25rem;
+  white-space: nowrap;
+}
+
+.level-start-button {
+  grid-column: 1 / -1;
+}
+
+.home-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.home-stats > div {
+  min-height: 78px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #eef7f2;
+}
+
+.home-stats span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.home-stats strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 1.35rem;
 }
 
 .top-bar {
@@ -289,7 +365,7 @@ h1 {
 
 .action-row {
   display: grid;
-  grid-template-columns: 52px 52px repeat(4, 1fr);
+  grid-template-columns: 52px 52px repeat(5, 1fr);
   gap: 8px;
 }
 
@@ -361,10 +437,6 @@ button:disabled {
   background: var(--surface-strong);
 }
 
-.solutions-panel.hidden {
-  display: none;
-}
-
 .solutions-heading {
   display: flex;
   justify-content: space-between;
@@ -402,8 +474,21 @@ button:disabled {
     padding: 10px;
   }
 
+  .home-screen,
   .game-board {
     padding: 14px;
+  }
+
+  .top-bar {
+    flex-wrap: wrap;
+  }
+
+  .score-card {
+    flex: 1;
+  }
+
+  .home-stats {
+    grid-template-columns: 1fr;
   }
 
   .target-panel {
@@ -434,7 +519,8 @@ button:disabled {
     grid-column: span 2;
   }
 
-  #newPuzzleButton {
+  #newPuzzleButton,
+  #homeButton {
     grid-column: 1 / -1;
   }
 }

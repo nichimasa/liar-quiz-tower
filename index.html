@@ -8,34 +8,76 @@
   </head>
   <body>
     <main class="app-shell">
-      <section class="game-board" aria-label="数字パズル">
+      <section class="home-screen" id="homeScreen" aria-label="ホーム">
+        <div class="home-hero">
+          <p class="kicker">Number Craft</p>
+          <h1>ナンバークラフト</h1>
+          <p class="home-copy">4つの数字をすべて使って10を作る。</p>
+        </div>
+
+        <section class="level-grid" aria-label="難易度選択">
+          <article class="level-card">
+            <div>
+              <p class="panel-label">1〜9</p>
+              <h2>初級</h2>
+            </div>
+            <strong id="easyProgressText">0 / 30</strong>
+            <button class="primary-button level-start-button" type="button" data-level="easy">始める</button>
+          </article>
+
+          <article class="level-card">
+            <div>
+              <p class="panel-label">1〜15</p>
+              <h2>中級</h2>
+            </div>
+            <strong id="mediumProgressText">0 / 50</strong>
+            <button class="primary-button level-start-button" type="button" data-level="medium">始める</button>
+          </article>
+
+          <article class="level-card">
+            <div>
+              <p class="panel-label">1〜20</p>
+              <h2>上級</h2>
+            </div>
+            <strong id="hardProgressText">0 / 80</strong>
+            <button class="primary-button level-start-button" type="button" data-level="hard">始める</button>
+          </article>
+        </section>
+
+        <div class="home-stats">
+          <div>
+            <span>合計正解</span>
+            <strong id="totalProgressText">0 / 160</strong>
+          </div>
+          <div>
+            <span>最速</span>
+            <strong id="bestTimeText">-</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="game-board hidden" id="gameScreen" aria-label="数字パズル">
         <header class="top-bar">
           <div>
-            <p class="kicker">Number Craft</p>
-            <h1>ナンバークラフト</h1>
+            <p class="kicker" id="levelLabel">初級</p>
+            <h1>10を作れ</h1>
           </div>
-          <div class="score-card" aria-label="現在の成績">
-            <span>連続</span>
-            <strong id="streakText">0</strong>
+          <div class="score-card" aria-label="現在の難易度の正解数">
+            <span>正解</span>
+            <strong id="clearedText">0/30</strong>
           </div>
           <div class="score-card" aria-label="経過時間">
             <span>時間</span>
-            <strong id="timeText">0.0</strong>
+            <strong id="timeText">0.0秒</strong>
           </div>
         </header>
 
-        <div class="difficulty-tabs" role="tablist" aria-label="難易度">
-          <button class="difficulty-button active" type="button" data-target="10">初級</button>
-          <button class="difficulty-button" type="button" data-target="20">中級</button>
-          <button class="difficulty-button" type="button" data-target="30">上級</button>
-        </div>
-
         <section class="target-panel" aria-live="polite">
           <div class="target-ring" aria-hidden="true">
-            <span id="targetBadge">10</span>
+            <span>10</span>
           </div>
           <div>
-            <p class="panel-label">目標</p>
+            <p class="panel-label" id="puzzleText">1 / 30</p>
             <h2 id="targetText">10を作れ</h2>
           </div>
         </section>
@@ -70,6 +112,7 @@
           <button class="ghost-button" id="hintButton" type="button">ヒント</button>
           <button class="ghost-button" id="answerButton" type="button">正解</button>
           <button class="ghost-button" id="newPuzzleButton" type="button">新しい問題</button>
+          <button class="ghost-button" id="homeButton" type="button">ホーム</button>
         </div>
 
         <p class="feedback" id="feedback" aria-live="polite"></p>

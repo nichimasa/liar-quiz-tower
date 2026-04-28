@@ -27,6 +27,7 @@ const puzzleBank = {
 
 const difficultyButtons = document.querySelectorAll(".difficulty-button");
 const streakText = document.querySelector("#streakText");
+const timeText = document.querySelector("#timeText");
 const targetBadge = document.querySelector("#targetBadge");
 const targetText = document.querySelector("#targetText");
 const expressionDisplay = document.querySelector("#expressionDisplay");
@@ -38,8 +39,13 @@ const parenButtons = document.querySelectorAll(".paren-button");
 const undoButton = document.querySelector("#undoButton");
 const clearButton = document.querySelector("#clearButton");
 const checkButton = document.querySelector("#checkButton");
+const hintButton = document.querySelector("#hintButton");
+const answerButton = document.querySelector("#answerButton");
 const newPuzzleButton = document.querySelector("#newPuzzleButton");
 const feedback = document.querySelector("#feedback");
+const solutionsPanel = document.querySelector("#solutionsPanel");
+const solutionCountText = document.querySelector("#solutionCountText");
+const solutionsList = document.querySelector("#solutionsList");
 
 let target = 10;
 let puzzleIndex = 0;
@@ -49,6 +55,10 @@ let usedNumberIds = new Set();
 let selectedOperator = null;
 let streak = 0;
 let solved = false;
+let solutionPatterns = [];
+let timerStartedAt = null;
+let timerElapsed = 0;
+let timerId = null;
 
 function makePuzzle(rawPuzzle) {
   return {
@@ -73,10 +83,13 @@ function loadPuzzle(nextTarget = target) {
   usedNumberIds = new Set();
   selectedOperator = null;
   solved = false;
+  solutionPatterns = generateSolutions(rawNumberValues(puzzle.numbers), target);
+  resetTimer();
   targetBadge.textContent = target;
   targetText.textContent = `${target}を作れ`;
   feedback.textContent = "";
   feedback.className = "feedback";
+  hideSolutions();
   updateDifficultyTabs();
   renderNumbers();
   renderExpression();
@@ -108,6 +121,7 @@ function chooseNumber(number) {
   const lastToken = tokens[tokens.length - 1];
   if (lastToken?.type === "number" || lastToken?.type === "closeParen") return;
 
+  startTimer();
   tokens.push({ type: "number", value: number.value, id: number.id });
   usedNumberIds.add(number.id);
   selectedOperator = null;
@@ -123,8 +137,10 @@ function chooseOperator(operator) {
   const lastToken = tokens[tokens.length - 1];
 
   if (lastToken.type === "operator") {
+    startTimer();
     lastToken.value = operator;
   } else if (lastToken.type === "number" || lastToken.type === "closeParen") {
+    startTimer();
     tokens.push({ type: "operator", value: operator });
   } else {
     return;
@@ -145,10 +161,12 @@ function chooseParen(paren) {
 
   if (paren === "open") {
     if (lastToken?.type === "number" || lastToken?.type === "closeParen") return;
+    startTimer();
     tokens.push({ type: "openParen", value: "(" });
   } else {
     if (!lastToken || lastToken.type === "operator" || lastToken.type === "openParen") return;
     if (closeCount >= openCount) return;
+    startTimer();
     tokens.push({ type: "closeParen", value: ")" });
   }
 
@@ -188,6 +206,9 @@ function updateControlStates() {
     const canClose = Boolean(lastToken) && lastToken.type !== "operator" && lastToken.type !== "openParen" && closeCount < openCount;
     button.disabled = solved || (paren === "open" ? !canOpen : !canClose);
   });
+
+  hintButton.disabled = solved;
+  answerButton.disabled = solved;
 }
 
 function formatToken(token) {
@@ -245,9 +266,11 @@ function checkAnswer() {
 
   if (Math.abs(value - target) < 0.000001) {
     solved = true;
+    stopTimer();
     streak += 1;
     streakText.textContent = streak;
-    showGood(`成功。${expressionDisplay.textContent} = ${target}`);
+    showGood(`成功。${expressionDisplay.textContent} = ${target} / ${formatTime(timerElapsed)}`);
+    showSolutions("正解しました。ほかの解き方も確認できます。");
     renderNumbers();
     updateControlStates();
     return;
@@ -294,6 +317,84 @@ function clearExpression() {
   updateControlStates();
 }
 
+function showHint() {
+  if (solved) return;
+  const hint = solutionPatterns[0] || puzzle.solution;
+  const visibleHint = hint.replace(/\d/g, "□");
+  feedback.innerHTML = `<span class="hint-text">ヒント: ${visibleHint}</span>`;
+  feedback.className = "feedback";
+}
+
+function revealAnswer() {
+  if (solved) return;
+  solved = true;
+  stopTimer();
+  streak = 0;
+  streakText.textContent = streak;
+  showBad(`正解例: ${solutionPatterns[0] || puzzle.solution} = ${target}`);
+  showSolutions("正解を表示しました。");
+  renderNumbers();
+  updateControlStates();
+}
+
+function showSolutions() {
+  solutionsList.innerHTML = "";
+  solutionPatterns.forEach((solution) => {
+    const item = document.createElement("li");
+    item.textContent = `${solution} = ${target}`;
+    solutionsList.append(item);
+  });
+
+  solutionCountText.textContent = `${solutionPatterns.length}通り`;
+  solutionsPanel.classList.remove("hidden");
+}
+
+function hideSolutions() {
+  solutionsPanel.classList.add("hidden");
+  solutionsList.innerHTML = "";
+  solutionCountText.textContent = "0通り";
+}
+
+function startTimer() {
+  if (timerStartedAt !== null || solved) return;
+  timerStartedAt = Date.now() - timerElapsed;
+  timerId = window.setInterval(updateTimerText, 100);
+  updateTimerText();
+}
+
+function stopTimer() {
+  if (timerId !== null) {
+    window.clearInterval(timerId);
+    timerId = null;
+  }
+  if (timerStartedAt !== null) {
+    timerElapsed = Date.now() - timerStartedAt;
+    timerStartedAt = null;
+  }
+  updateTimerText();
+}
+
+function resetTimer() {
+  if (timerId !== null) {
+    window.clearInterval(timerId);
+    timerId = null;
+  }
+  timerStartedAt = null;
+  timerElapsed = 0;
+  updateTimerText();
+}
+
+function updateTimerText() {
+  if (timerStartedAt !== null) {
+    timerElapsed = Date.now() - timerStartedAt;
+  }
+  timeText.textContent = formatTime(timerElapsed);
+}
+
+function formatTime(milliseconds) {
+  return `${(milliseconds / 1000).toFixed(1)}秒`;
+}
+
 function countParens(kind) {
   const tokenType = kind === "open" ? "openParen" : "closeParen";
   return tokens.filter((token) => token.type === tokenType).length;
@@ -307,6 +408,98 @@ function isCompleteExpression(inputTokens) {
     inputTokens.filter((token) => token.type === "openParen").length ===
     inputTokens.filter((token) => token.type === "closeParen").length
   );
+}
+
+function rawNumberValues(numbers) {
+  return numbers.map((number) => number.value);
+}
+
+function generateSolutions(numbers, solutionTarget) {
+  const results = new Set();
+  const initialItems = numbers.map((number, index) => ({
+    value: number,
+    expression: String(number),
+    key: `${number}-${index}`,
+  }));
+
+  searchSolutions(initialItems, results, solutionTarget);
+
+  return [...results].sort((a, b) => {
+    if (a.length !== b.length) return a.length - b.length;
+    return a.localeCompare(b);
+  });
+}
+
+function searchSolutions(items, results, solutionTarget) {
+  if (items.length === 1) {
+    if (Math.abs(items[0].value - solutionTarget) < 0.000001) {
+      results.add(trimOuterParens(items[0].expression));
+    }
+    return;
+  }
+
+  for (let first = 0; first < items.length - 1; first += 1) {
+    for (let second = first + 1; second < items.length; second += 1) {
+      const left = items[first];
+      const right = items[second];
+      const rest = items.filter((_, index) => index !== first && index !== second);
+
+      combineItems(left, right).forEach((combined) => {
+        searchSolutions([...rest, combined], results, solutionTarget);
+      });
+    }
+  }
+}
+
+function combineItems(left, right) {
+  const combined = [
+    {
+      value: left.value + right.value,
+      expression: `(${left.expression} + ${right.expression})`,
+    },
+    {
+      value: left.value * right.value,
+      expression: `(${left.expression} × ${right.expression})`,
+    },
+    {
+      value: left.value - right.value,
+      expression: `(${left.expression} − ${right.expression})`,
+    },
+    {
+      value: right.value - left.value,
+      expression: `(${right.expression} − ${left.expression})`,
+    },
+  ];
+
+  if (Math.abs(right.value) > 0.000001) {
+    combined.push({
+      value: left.value / right.value,
+      expression: `(${left.expression} ÷ ${right.expression})`,
+    });
+  }
+
+  if (Math.abs(left.value) > 0.000001) {
+    combined.push({
+      value: right.value / left.value,
+      expression: `(${right.expression} ÷ ${left.expression})`,
+    });
+  }
+
+  return combined;
+}
+
+function trimOuterParens(expression) {
+  if (!expression.startsWith("(") || !expression.endsWith(")")) return expression;
+
+  let depth = 0;
+  for (let index = 0; index < expression.length; index += 1) {
+    const character = expression[index];
+    if (character === "(") depth += 1;
+    if (character === ")") depth -= 1;
+    if (depth === 0 && index < expression.length - 1) return expression;
+  }
+
+  return expression.slice(1, -1);
 }
 
 difficultyButtons.forEach((button) => {
@@ -327,6 +520,8 @@ parenButtons.forEach((button) => {
 undoButton.addEventListener("click", undo);
 clearButton.addEventListener("click", clearExpression);
 checkButton.addEventListener("click", checkAnswer);
+hintButton.addEventListener("click", showHint);
+answerButton.addEventListener("click", revealAnswer);
 newPuzzleButton.addEventListener("click", () => loadPuzzle(target));
 
 loadPuzzle();

@@ -18,6 +18,10 @@
             <span>連続</span>
             <strong id="streakText">0</strong>
           </div>
+          <div class="score-card" aria-label="経過時間">
+            <span>時間</span>
+            <strong id="timeText">0.0</strong>
+          </div>
         </header>
 
         <div class="difficulty-tabs" role="tablist" aria-label="難易度">
@@ -63,10 +67,20 @@
           <button class="icon-button" id="undoButton" type="button" aria-label="1つ戻す">↶</button>
           <button class="icon-button" id="clearButton" type="button" aria-label="式を消す">C</button>
           <button class="primary-button" id="checkButton" type="button">判定</button>
+          <button class="ghost-button" id="hintButton" type="button">ヒント</button>
+          <button class="ghost-button" id="answerButton" type="button">正解</button>
           <button class="ghost-button" id="newPuzzleButton" type="button">新しい問題</button>
         </div>
 
         <p class="feedback" id="feedback" aria-live="polite"></p>
+
+        <section class="solutions-panel hidden" id="solutionsPanel" aria-label="正解パターン">
+          <div class="solutions-heading">
+            <p class="panel-label">正解パターン</p>
+            <strong id="solutionCountText">0通り</strong>
+          </div>
+          <ol class="solutions-list" id="solutionsList"></ol>
+        </section>
       </section>
     </main>
 
